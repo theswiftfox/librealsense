@@ -18,13 +18,19 @@ PATCH_NAME=patch-$SRC_VERSION_ID
 
 # ARCH Linux --  KERNEL_NAME=linux-$SRC_VERSION_ID-$SRC_VERSION_REL-$ARCH.pkg.tar.xz
 
-mkdir kernel
+#mkdir kernel
 cd kernel
 
 ## Get the kernel
+if [ ! -e $KERNEL_NAME.tar.xz ]; then
 wget https://www.kernel.org/pub/linux/kernel/v4.x/$KERNEL_NAME.tar.xz
-wget https://www.kernel.org/pub/linux/kernel/v4.x/$PATCH_NAME.xz
-wget https://www.kernel.org/pub/linux/kernel/v4.x/$PATCH_NAME.sign
+#wget https://www.kernel.org/pub/linux/kernel/v4.x/$PATCH_NAME.xz
+#wget https://www.kernel.org/pub/linux/kernel/v4.x/$PATCH_NAME.sign
+fi
+
+if [ -d $KERNEL_NAME ]; then
+    rm -rf $KERNEL_NAME
+fi
 
 echo "Extract the kernel"
 tar xf $KERNEL_NAME.tar.xz
@@ -41,7 +47,12 @@ cd $KERNEL_NAME
 echo "RealSense patch..."
 
 # Apply our RealSense specific patch
-patch -p1 < ../../realsense-camera-formats.patch
+patch -p1 < ../../scripts/realsense-camera-formats.patch
+
+echo "HID patch..."
+
+patch -p1 < ../../scripts/realsense-hid-ubuntu-xenial-v4.16.patch
+
 
 # Prepare to compile modules
 
@@ -66,6 +77,13 @@ make -C $KBASE M=$KBASE/drivers/media/usb/uvc/ modules
 # Copy to sane location
 #sudo cp $KBASE/drivers/media/usb/uvc/uvcvideo.ko ~/$LINUX_BRANCH-uvcvideo.ko
 cd ../../../../../
+
+if [ -e ../uvcvideo.ko ]; then
+    rm ../uvcvideo.ko
+fi
+if [ -e ../uvcvideo.ko.xz ]; then
+    rm ../uvcvideo.ko.xz
+fi
 
 cp $KBASE/drivers/media/usb/uvc/uvcvideo.ko ../uvcvideo.ko
 
@@ -111,6 +129,6 @@ fi
 
 sudo modprobe uvcvideo
 
-rm -rf kernel
+#rm -rf kernel
 
 echo "Script has completed. Please consult the installation guide for further instruction."
