@@ -18,7 +18,10 @@ PATCH_NAME=patch-$SRC_VERSION_ID
 
 # ARCH Linux --  KERNEL_NAME=linux-$SRC_VERSION_ID-$SRC_VERSION_REL-$ARCH.pkg.tar.xz
 
-#mkdir kernel
+if [ ! -d kernel ]; then
+	mkdir kernel
+fi
+
 cd kernel
 
 ## Get the kernel
